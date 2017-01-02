@@ -13,7 +13,8 @@ function goGoGadgetImageResize (file, opt) {
 
 	if(opt.suffix) { var suffix = "-" + opt.suffix; }
 	
-	var name = path.substring(path.lastIndexOf('\\')+1, path.lastIndexOf('.')) + suffix + path.substring(path.lastIndexOf('.'));
+	var extension = path.substring(path.lastIndexOf('.'));
+	var name = path.substring(path.lastIndexOf('\\')+1, path.lastIndexOf('.')) + suffix + extension;
 	if(opt.flattenDirectories === false){
 		name = path.substring(0, path.lastIndexOf('.')) + suffix + extension;
 	}
