@@ -7,16 +7,21 @@ const PLUGIN_NAME = "gulp-jimp-resize";
 function goGoGadgetImageResize (file, opt) {
 
 	var path = file.path;
+	var base = file.base;
 
 	var suffix = "";
 
 	if(opt.suffix) { var suffix = "-" + opt.suffix; }
 	
 	var name = path.substring(path.lastIndexOf('\\')+1, path.lastIndexOf('.')) + suffix + path.substring(path.lastIndexOf('.'));
+	if(opt.flattenDirectories === false){
+		name = path.substring(0, path.lastIndexOf('.')) + suffix + extension;
+	}
 
 	if(!opt.width && !opt.height) { //no resizing to be done
 		return new gutil.File({
 			path: name,
+			base: base,
 			contents: file.contents
 		})
 	}
@@ -49,6 +54,7 @@ function goGoGadgetImageResize (file, opt) {
 
 	       		resolve(new gutil.File({
 	       			path: name,
+					base: base,
 	       			contents:buffer
 	       		}));
 	        });
