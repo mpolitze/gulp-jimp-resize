@@ -37,8 +37,16 @@ function goGoGadgetImageResize (file, opt) {
 			var width = Jimp.AUTO; var height = Jimp.AUTO;
 
 			if((opt.width && opt.width > image.bitmap.width) || 
-				(opt.height && opt.height > image.bitmap.height)) {
-				gutil.log(PLUGIN_NAME, 'You are resizing an image to a larger size than the original');
+			   (opt.height && opt.height > image.bitmap.height)) {
+				if(opt.upscale === false){
+					resolve(new gutil.File({
+						path: name,
+						contents: file.contents
+					}));
+					return;
+				}else{
+					gutil.log(PLUGIN_NAME, 'You are resizing an image to a larger size than the original');
+				}
 			}
 
 			if(opt.width) { width = opt.width; }
@@ -47,7 +55,22 @@ function goGoGadgetImageResize (file, opt) {
 			
 			image.resize(width, height).quality(100);
         	
-	       	var newImg = image.getBuffer(Jimp.MIME_JPEG, function(err, buffer){
+			var mime;
+			switch(extension.toLowerCase()){
+				case ".jpg":
+				case ".jpeg":
+				case ".jpe":
+					mime = Jimp.MIME_JPEG;
+					break;
+				case ".png":
+					mime = Jimp.MIME_PNG;
+					break;
+				case ".bmp":
+				case ".dib":
+					mime = Jimp.MIME_BMP;
+					break;
+			}
+	       	var newImg = image.getBuffer(mime, function(err, buffer){
 				if (err) {
 					reject(err);
 					return;

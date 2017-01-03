@@ -26,14 +26,28 @@ function read(contents, fn, done) {
 	});
 }
 
+function readImage(contents){
+	return new Promise(function(resolve, reject){
+		Jimp.read(contents, function(err, image){
+			if(err) {
+				reject(err);
+			}else{
+				resolve(image);
+			}
+		})
+	});
+}
+
 var testImage = new gutil.File({
 	path: __dirname + '/originals/trees.jpg',
-	contents: fs.readFileSync( __dirname + '/originals/trees.jpg')
+	contents: fs.readFileSync( __dirname + '/originals/trees.jpg'),
+	mime: "image/jpg"
 })
 
 var testImage2 = new gutil.File({
 	path: __dirname + '/originals/portrait.png',
-	contents: fs.readFileSync( __dirname + '/originals/portrait.png')
+	contents: fs.readFileSync( __dirname + '/originals/portrait.png'),
+	mime: "image/png"
 })
 
 var testText= new gutil.File({
@@ -103,7 +117,7 @@ describe('testing gulp-jimp-resize', function(){
 
 	describe('jimpy bits', function() { //deals with the 'jimp' bits (resize.js)
 
-		this.timeout(4000);
+		this.timeout(6000);
 
 		describe('should save with correct name', function() {
 			it('test one', function(done) {
@@ -167,14 +181,15 @@ describe('testing gulp-jimp-resize', function(){
 			var options = {sizes: [
 					{"suffix": "don't", "width": 300},
 					{"suffix": "be-a", "height": 300},
-					{"suffix": "square", "width": 200, "height": 200}
+					{"suffix": "square", "width": 200, "height": 200},
+					{"suffix": "stay-small", "width": 600, "upscale": false},
+					{"suffix": "get-big", "width": 600}
 				]};
 
 			it('test one - width', function(done) {
 
 				resizeyBit(testImage, options.sizes[0])
 				.then(function(res) {
-					//console.log(res);
 					read(res.contents, function(image) {
 						expect(image.bitmap.width).to.equal(300);
 					}, done);
@@ -211,7 +226,90 @@ describe('testing gulp-jimp-resize', function(){
 					.catch(err => console.log(err))
 			})
 
+			it('test four - upscale=false', function(done) {
+				
+				var size = options.sizes[3];
+				Promise.all([testImage, testImage2].map(img => 
+					resizeyBit(img, size)
+						.then(res => 
+							Promise.all([
+								readImage(res.contents),
+								readImage(img.contents)
+							])
+						)
+						.then(images => {
+							expect(images[0].bitmap.width).to.equal(Math.min(images[1].bitmap.width, size.width));
+						})
+				))
+				.then(() => {
+					done();
+				})
+				.catch(err => {
+					console.log(err);
+					done(err);
+				});					
+			})
+
+			it('test four - upscale (default)', function(done) {
+				
+				var size = options.sizes[4];
+				Promise.all([testImage, testImage2].map(img => 
+					resizeyBit(img, size)
+						.then(res => 
+							readImage(res.contents)
+						)
+						.then(image => 
+							expect(image.bitmap.width).to.equal(600)
+						)
+				))
+				.then(() => {
+					done();
+				})
+				.catch(err => {
+					console.log(err);
+					done(err);
+				});	
+			})
 		})	
+
+		describe("should save as the correct filetype", function(){
+			
+			it('test one', function(done) {
+			
+				var options = {	sizes: [
+					{"suffix": "copy"},
+					{"suffix": "small", "width": 20},
+				]};
+
+				var operations = [];
+				for(var imageUnderTest of [testImage2, testImage]){
+					for(var optionUnderTest of options.sizes){
+						operations.push(resizeyBit(imageUnderTest, optionUnderTest));
+					}
+				}
+
+				Promise.all(operations)
+					.then(imageArray => {
+						imageArray.forEach(image => {
+							var path = image.path;
+							var name = path.substring(path.lastIndexOf('/')+1);
+							console.log("\t" + name);
+							var extension = path.substring(path.lastIndexOf('.'));
+							var expextedbytes = [];
+							switch(extension){
+								case ".jpg":
+									expextedbytes = [0xFF, 0xD8, 0xFF]; break;
+								case ".png":
+									expextedbytes = [0x89,0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]; break;
+							}
+							var firstbytes = image.contents.slice(0, expextedbytes.length);
+							expect(firstbytes).to.deep.equal(Buffer.from(expextedbytes));
+						})
+					})
+					.then(() => done())
+					.catch(err => { console.log(err); done(err); });
+			});
+		});
 
 		describe("Error Messages:", function() {
 			it('Bad file type with .txt', function(done) {
