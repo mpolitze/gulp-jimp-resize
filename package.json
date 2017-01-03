@@ -23,7 +23,8 @@
   "license": "MIT",
   "dependencies": {
     "jimp": "^0.2.24",
-    "bluebird": "^3.4.1"
+    "bluebird": "^3.4.1",
+    "vinyl": "^2.0.1"
   },
   "devDependencies": {
     "chai": "^3.5.0",
