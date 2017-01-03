@@ -303,7 +303,13 @@ describe('testing gulp-jimp-resize', function(){
 									expextedbytes = [0x89,0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]; break;
 							}
 							var firstbytes = image.contents.slice(0, expextedbytes.length);
-							expect(firstbytes).to.deep.equal(Buffer.from(expextedbytes));
+							if(process.version.indexOf("v0.") == 0 || process.version.indexOf("v4.") == 0){
+								// Workaround for node versions that do not have Buffer.from (4 and 0.xx)
+								// new Buffer was depricated in node 6
+								expect(firstbytes).to.deep.equal(new Buffer(expextedbytes));
+							}else{
+								expect(firstbytes).to.deep.equal(Buffer.from(expextedbytes));
+							}							
 						})
 					})
 					.then(() => done())
