@@ -32,7 +32,15 @@ gulp.task('images', function() {
 ```
 
 #options:
-gulp-jimp-resize takes an Object 'sizes'. Each element inside 'sizes' is produced from each image passed to the plugin. Each option has 3 optional attributes. Suffix denotes the added string to the name of the new image. Width and height are self explainitory. If only one of width or height is passed through, the plugin will keep the apsect ratio of the original image. These attributes are also optional (i.e, you can give a suffix only and rename the image). If the optional parameter 'upscale' is set to false, smaller images will not be resized but copied.
+gulp-jimp-resize takes an Object 'sizes'. Each element inside 'sizes' is produced from each image passed to the plugin. Each option has 5 optional attributes. 
+
+Suffix denotes the added string to the name of the new image. 
+
+Width and height are self explainitory. If only one of width or height is passed through, the plugin will keep the apsect ratio of the original image. These attributes are also optional (i.e, you can give a suffix only and rename the image). 
+
+If the optional parameter 'upscale' is set to false, smaller images will not be resized but copied.
+
+If the optional parameter 'flattenDirectories' is set to false relative paths of the images will be preserved.
 
 #Licence
 MIT
