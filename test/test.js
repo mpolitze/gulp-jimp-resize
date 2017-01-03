@@ -49,7 +49,7 @@ var testImage2 = new gutil.File({
 	path: __dirname + '/originals/portrait.png',
 	contents: fs.readFileSync( __dirname + '/originals/portrait.png'),
 	cwd: __dirname + "/originals/",
-	base: __dirname + "/originals/"
+	base: __dirname + "/"
 })
 
 var testText= new gutil.File({
@@ -205,8 +205,8 @@ describe('testing gulp-jimp-resize', function(){
 
 				var imageUnderTest = testImage2;			
 				var options = {sizes: [
-					{"suffix": "make", width: 20, flattenDirectories: false},
-					{"suffix": "me", width: 600, upscale: false, flattenDirectories: false},
+					{"suffix": "don't", width: 20, flattenDirectories: false},
+					{"suffix": "make", width: 600, upscale: false, flattenDirectories: false},
 					{"suffix": "flat", flattenDirectories: false}
 				]};
 				

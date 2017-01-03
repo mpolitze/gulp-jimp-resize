@@ -45,6 +45,7 @@ function goGoGadgetImageResize (file, opt) {
 				if(opt.upscale === false){
 					resolve(new gutil.File({
 						path: name,
+						base: base,
 						cwd: cwd,
 						contents: file.contents
 					}));
