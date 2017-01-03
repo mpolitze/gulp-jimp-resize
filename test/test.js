@@ -41,13 +41,15 @@ function readImage(contents){
 var testImage = new gutil.File({
 	path: __dirname + '/originals/trees.jpg',
 	contents: fs.readFileSync( __dirname + '/originals/trees.jpg'),
-	mime: "image/jpg"
+	cwd: __dirname + "/originals/",
+	base: __dirname + "/"
 })
 
 var testImage2 = new gutil.File({
 	path: __dirname + '/originals/portrait.png',
 	contents: fs.readFileSync( __dirname + '/originals/portrait.png'),
-	mime: "image/png"
+	cwd: __dirname + "/originals/",
+	base: __dirname + "/originals/"
 })
 
 var testText= new gutil.File({
@@ -173,6 +175,52 @@ describe('testing gulp-jimp-resize', function(){
 
 				done();
 
+			});
+		});
+
+		describe('should save to correct folder', function() {
+			it('with flattenDirectories=true (default)', function(done) {	
+				
+				var imageUnderTest = testImage2;
+				var options = {sizes: [
+					{"suffix": "make", width: 20},
+					{"suffix": "me", width: 600, upscale: false},
+					{"suffix": "flat"}
+				]};
+
+				Promise.all(options.sizes.map(opt => resizeyBit(imageUnderTest, opt)))
+					.then(imageArray => {
+						var index = 0;
+						imageArray.forEach(image => 						
+						{
+							expect(image.base).to.equal(process.cwd());
+							expect(image.cwd).to.equal(process.cwd());
+						})
+					})
+					.then(() => done())
+					.catch(err => done(err));
+			});
+
+			it('with flattenDirectories=false', function(done) {
+
+				var imageUnderTest = testImage2;			
+				var options = {sizes: [
+					{"suffix": "make", width: 20, flattenDirectories: false},
+					{"suffix": "me", width: 600, upscale: false, flattenDirectories: false},
+					{"suffix": "flat", flattenDirectories: false}
+				]};
+				
+				Promise.all(options.sizes.map(opt => resizeyBit(imageUnderTest, opt)))
+					.then(imageArray => {
+						var index = 0;
+						imageArray.forEach(image => 						
+						{
+							expect(image.base).to.equal(imageUnderTest.base);
+							expect(image.cwd).to.equal(imageUnderTest.cwd);							
+						})
+					})
+					.then(() => done())
+					.catch(err => done(err));
 			});
 		});
 
